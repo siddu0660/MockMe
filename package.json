@@ -16,6 +16,10 @@
       {
         "command": "mockme.welcome",
         "title": "Welcome"
+      },
+      {
+        "command": "mockme.findMyStats",
+        "title": "Find My Stats"
       }
     ]
   },

@@ -253,7 +253,50 @@ export function activate(context: vscode.ExtensionContext) {
         }
     );
 
-	context.subscriptions.push(welcome);
+	const stats = vscode.commands.registerCommand(
+		"mockme.findMyStats",
+		async () => {
+		const username = context.globalState.get("leetcodeId") as string;
+
+		if (!username) {
+			vscode.window.showWarningMessage("No username provided.");
+			return;
+		}
+
+		vscode.window.withProgress(
+			{
+			location: vscode.ProgressLocation.Notification,
+			title: "Fetching LeetCode stats...",
+			cancellable: true,
+			},
+			async () => {
+			const stats = await getData(username);
+			if (stats) {
+				const lines = [
+					`LeetCode Stats for ${stats.username}:`,
+					`Ranking: ${stats.ranking}`,
+					`Total Solved: ${stats.totalSolved}`,
+					`Easy: ${stats.easySolved}`,
+					`Medium: ${stats.mediumSolved}`,
+					`Hard: ${stats.hardSolved}`,
+					`Recent Submissions:`,
+					...(stats.recentSubmissions?.slice(0, 10).map(sub =>
+						`	${sub.title.padEnd(30)} ${sub.statusDisplay}`
+					) || ["None"])
+				];
+				
+				vscode.window.showQuickPick(lines, { placeHolder: "LeetCode Summary" });
+			} else {
+				vscode.window.showErrorMessage(
+				"Could not fetch stats. Please check the username and try again."
+				);
+			}
+			}
+		);
+		}
+	);
+
+	context.subscriptions.push(welcome, stats);
 }
 
 export function deactivate() {}
